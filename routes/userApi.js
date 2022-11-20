@@ -85,15 +85,19 @@ router.post("/changepassword", async (req, res) => {
         }
         // Validate if user exist in our database
         const user = await User.findOne({ email });
-        console.log(user);
 
         if (user && (await bcrypt.compare(password, user.password))) {
             // Create token
             // user
-            User.updateOne(user, { password: newPassword });;
-            res.status(200).json(user);
+            User.findByIdAndUpdate(user.id, { password: newPassword }, (err, data) => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log(data);
+                }
+            });
         }
-        res.status(400).send("Invalid Credentials");
+        res.status(400).send("Password changed successfully");
     } catch (err) {
         console.log(err);
     }
