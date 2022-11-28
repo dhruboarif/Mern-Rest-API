@@ -56,14 +56,16 @@ exports.login = async (req, res) => {
             res.status(400).send("All input is required");
         }
         // Validate if user exist in our database
-        const user = await User.findOne({ email });
+        const user = await UserModel.findOne({ email });
 
         if (user && (await bcrypt.compare(password, user.password))) {
             // Create token
             // user
             res.status(200).json(user);
         }
-        res.status(400).send("Invalid Credentials");
+        else {
+            res.status(400).send("Invalid Credentials");
+        }
     } catch (err) {
         console.log(err);
     }
@@ -100,4 +102,33 @@ exports.changePassword = async (req, res) => {
         console.log(err);
     }
     // Our register logic ends here
-}; 
+};
+
+
+exports.updateUser = async (req, res) => {
+    let id = req.params.id;
+    let Query = { _id: id };
+    let reqBody = req.body;
+
+    UserModel.updateOne(Query, reqBody, (err, data) => {
+        if (err) {
+            res.status(400).json({ status: "fail", data: err });
+        } else {
+            res.status(200).json({ status: "Ok", data: data });
+        };
+    })
+}
+
+
+exports.DeleteStudent = (req, res) => {
+    let id = req.params.id;
+    let Query = { _id: id };
+
+    UserModel.remove(Query, (err, data) => {
+        if (err) {
+            res.status(400).json({ status: "fail", data: err });
+        } else {
+            res.status(200).json({ status: "Ok", data: data });
+        };
+    })
+}
