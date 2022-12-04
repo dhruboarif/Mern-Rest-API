@@ -1,5 +1,6 @@
 const UserModel = require("../Model/UserModel");
 const bcrypt = require('bcryptjs');
+const jwt = require("jsonwebtoken")
 
 exports.getUser = (req, res) => {
     let Query = {};
@@ -16,7 +17,7 @@ exports.getUser = (req, res) => {
 exports.createUser = async (req, res) => {
 
     try {
-        console.log(req.body);
+        //console.log(req.body);
         const { first_name, last_name, email, password, role } = req.body;
 
         // Validate user input
@@ -60,7 +61,18 @@ exports.login = async (req, res) => {
 
         if (user && (await bcrypt.compare(password, user.password))) {
             // Create token
+            const token = jwt.sign(
+                { user_id: user._id, email },
+                process.env.TOKEN_KEY,
+                {
+                    expiresIn: "2h",
+                }
+            );
+
+            // save user token
+            user.token = token;
             // user
+
             res.status(200).json(user);
         }
         else {
@@ -105,14 +117,15 @@ exports.changePassword = async (req, res) => {
 };
 
 
-exports.updateUser = async (req, res) => {
+exports.updateProfile = async (req, res) => {
     let id = req.params.id;
-    let Query = { _id: id };
+    let Query = req.headers["email"];
     let reqBody = req.body;
 
-    UserModel.updateOne(Query, reqBody, (err, data) => {
+    UserModel.updateOne({ email: Query }, { $set: reqBody }, { upsert: true }, (err, data) => {
+        console.log(reqBody)
         if (err) {
-            res.status(400).json({ status: "fail", data: err });
+            res.status(400).json({ status: "Fail", data: err });
         } else {
             res.status(200).json({ status: "Ok", data: data });
         };

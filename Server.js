@@ -7,7 +7,6 @@ const { readdirSync } = require('fs')
 const mongoose = require("mongoose");
 require('dotenv').config()
 
-const port = process.env.port;
 
 app.use(cors());
 app.use(express.json());
@@ -32,9 +31,8 @@ mongoose
     });
 
 
+//Routing Implement
 const aa = readdirSync("./routes").map(r => app.use("/api/v1", require(`./routes/${r}`)));
 
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-})
+module.exports = app; 
